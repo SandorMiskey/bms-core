@@ -1,0 +1,103 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
+
+# General files and editor artifacts {{{
+
+*.log
+*.lock
+*.tmp
+*.temp
+*.swp
+*~
+**/.trash
+
+# }}}
+# Secrets and env files {{{
+
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# }}}
+# Go build artifacts and tooling {{{
+
+/bin/
+/dist/
+/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+.coverage/
+.coverage.*
+/vendor/
+go.work
+
+# }}}
+# Node tooling (if used) {{{
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+.pnpm-store
+*.tgz
+
+# }}}
+# macOS metadata files {{{
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+*.icloud
+
+# }}}
+# Vim files {{{
+
+[._]*.s[a-v][a-z]
+!*.svg
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+.netrwhist
+tags
+[._]*.un~
+
+# }}}
+# VisualStudioCode files {{{
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+.history/
+.vscode-test
+*.vsix
+.ionide
+
+# }}}
