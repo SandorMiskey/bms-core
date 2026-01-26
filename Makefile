@@ -9,7 +9,7 @@ MIGRATIONS_POSTGRES ?= db/migrations/postgres
 MIGRATIONS_SQLITE ?= db/migrations/sqlite
 SCHEMA_POSTGRES ?= db/schema/postgres
 SCHEMA_SQLITE ?= db/schema/sqlite
-POSTGRES_DSN ?= postgres://localhost:5432/bms?sslmode=disable
+DSN_POSTGRES ?= postgres://localhost:5432/bms?sslmode=disable
 SQLITE_PATH ?= bms.db
 SQLITE_DSN ?= sqlite3://$(SQLITE_PATH)
 
@@ -27,18 +27,24 @@ lint: ## run linter
 	golangci-lint run ./...
 
 dep: ## check migration prerequisites
+	@echo "checking migration prerequisites..."
 	@command -v $(MIGRATE) >/dev/null || { echo "missing migrate CLI"; exit 1; }
+	@version=$$($(MIGRATE) -version 2>&1 || true); \
+	if [ -z "$$version" ]; then version="unknown"; fi; \
+	echo "migrate: $$version"
 	@command -v sqlite3 >/dev/null || { echo "missing sqlite3"; exit 1; }
+	@echo "sqlite3: $$(sqlite3 --version)"
 	@command -v pg_dump >/dev/null || { echo "missing pg_dump"; exit 1; }
+	@echo "pg_dump: $$(pg_dump --version)"
 
 migrate-check: dep ## run migration lint checks
-	@bash scripts/migrate-check.sh
+	@sh scripts/migrate-check.sh
 
 migrate-down-postgres: dep migrate-check ## rollback one postgres migration
-	$(MIGRATE) -database $(POSTGRES_DSN) -path $(MIGRATIONS_POSTGRES) down 1
+	$(MIGRATE) -database $(DSN_POSTGRES) -path $(MIGRATIONS_POSTGRES) down 1
 
 migrate-up-postgres: dep migrate-check ## apply postgres migrations
-	$(MIGRATE) -database $(POSTGRES_DSN) -path $(MIGRATIONS_POSTGRES) up
+	$(MIGRATE) -database $(DSN_POSTGRES) -path $(MIGRATIONS_POSTGRES) up
 
 migrate-down-sqlite: dep migrate-check ## rollback one sqlite migration
 	$(MIGRATE) -database $(SQLITE_DSN) -path $(MIGRATIONS_SQLITE) down 1
@@ -48,11 +54,11 @@ migrate-up-sqlite: dep migrate-check ## apply sqlite migrations
 
 migrate-dump-postgres: dep ## generate postgres schema dump
 	@mkdir -p $(SCHEMA_POSTGRES)
-	@version=$$($(MIGRATE) -database $(POSTGRES_DSN) -path $(MIGRATIONS_POSTGRES) version 2>/dev/null | cut -d ' ' -f 1 || true); \
+	@version=$$($(MIGRATE) -database $(DSN_POSTGRES) -path $(MIGRATIONS_POSTGRES) version 2>/dev/null | cut -d ' ' -f 1 || true); \
 	if [ -z "$$version" ]; then version=none; fi; \
 	ts=$$(date +%Y%m%d%H%M%S); \
 	file="$(SCHEMA_POSTGRES)/schema_$${ts}_after_$${version}.sql"; \
-	pg_dump --schema-only --no-owner --no-privileges "$(POSTGRES_DSN)" > "$${file}"
+	pg_dump --schema-only --no-owner --no-privileges "$(DSN_POSTGRES)" > "$${file}"
 
 migrate-dump-sqlite: dep ## generate sqlite schema dump
 	@mkdir -p $(SCHEMA_SQLITE)
