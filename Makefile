@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
 
-.PHONY: build dep fmt help lint migrate-check migrate-down-postgres migrate-down-sqlite migrate-dump-postgres migrate-dump-sqlite migrate-up-postgres migrate-up-sqlite test vet
+.PHONY: build dep fmt help lint migrate-check migrate-down-postgres migrate-down-sqlite migrate-dump-postgres migrate-dump-sqlite migrate-up-postgres migrate-up-sqlite migrate-validate-postgres migrate-validate-sqlite test vet
 
 MIGRATE ?= migrate
 MIGRATIONS_SHARED ?= db/migrations/shared
@@ -67,6 +67,12 @@ migrate-dump-sqlite: dep ## generate sqlite schema dump
 	ts=$$(date +%Y%m%d%H%M%S); \
 	file="$(SCHEMA_SQLITE)/schema_$${ts}_after_$${version}.sql"; \
 	sqlite3 "$(SQLITE_PATH)" ".schema" > "$${file}"
+
+migrate-validate-postgres: dep migrate-check migrate-up-postgres migrate-dump-postgres ## validate postgres migrations
+	@echo "postgres migration validation complete"
+
+migrate-validate-sqlite: dep migrate-check migrate-up-sqlite migrate-dump-sqlite ## validate sqlite migrations
+	@echo "sqlite migration validation complete"
 
 test: ## run all tests
 	go test ./...
