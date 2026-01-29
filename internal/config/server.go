@@ -26,17 +26,17 @@ const (
 // ServerConfig holds top-level server settings. {{{
 
 type ServerConfig struct {
-	Environment Environment `toml:"environment"`	// Runtime mode (`local` or `remote`).
-	ID          string      `toml:"id"`		// Instance identifier (ULID string).
+	Environment Environment `toml:"environment"` // Runtime mode (`local` or `remote`).
+	ID          string      `toml:"id"`          // Instance identifier (ULID string).
 }
 
 // }}}
 // DatabaseConfig configures database connectivity and migrations. {{{
 
 type DatabaseConfig struct {
-	DSN        string         `toml:"dsn"`		// Connection string for the selected driver.
-	Driver     DatabaseDriver `toml:"driver"`		// Database engine (`sqlite` or `postgres`).
-	Migrations string         `toml:"migrations"`	// Migrations directory.
+	DSN        string         `toml:"dsn"`        // Connection string for the selected driver.
+	Driver     DatabaseDriver `toml:"driver"`     // Database engine (`sqlite` or `postgres`).
+	Migrations string         `toml:"migrations"` // Migrations directory.
 }
 
 // }}}

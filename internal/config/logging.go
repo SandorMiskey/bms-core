@@ -28,8 +28,8 @@ const (
 // LoggingConfig configures structured logging output. {{{
 
 type LoggingConfig struct {
-	Format LogFormat `toml:"format"`	// Log format (`json` or `text`).
-	Level  LogLevel  `toml:"level"`	// Minimum log level (`debug`, `info`, `warn`, `error`).
+	Format LogFormat `toml:"format"` // Log format (`json` or `text`).
+	Level  LogLevel  `toml:"level"`  // Minimum log level (`debug`, `info`, `warn`, `error`).
 }
 
 // }}}

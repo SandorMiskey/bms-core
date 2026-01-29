@@ -3,13 +3,22 @@
 
 package config
 
-import "strings"
+import (
+	"errors"
+	"strings"
+)
 
-// Validation error types. {{{
+// Config errors and validation types. {{{
+
+// ErrConfigNotFound indicates the config file does not exist.
+var ErrConfigNotFound = errors.New("config file not found")
+
+// ErrConfigPathIsDir indicates the config path points to a directory.
+var ErrConfigPathIsDir = errors.New("config path is a directory")
 
 type FieldError struct {
-	Message string `toml:"-"`	// Validation error message.
-	Path    string `toml:"-"`	// Config field path.
+	Message string `toml:"-"` // Validation error message.
+	Path    string `toml:"-"` // Config field path.
 }
 
 func (err FieldError) Error() string {

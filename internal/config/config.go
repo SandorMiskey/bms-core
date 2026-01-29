@@ -6,18 +6,18 @@ package config
 // Config holds server and client configuration sections. {{{
 
 type Config struct {
-	Auth         AuthConfig         `toml:"auth"`		// Authentication settings.
-	Database     DatabaseConfig     `toml:"database"`		// Database connectivity settings.
-	GRPC         GRPCConfig         `toml:"grpc"`		// gRPC listener configuration.
-	Integrations IntegrationsConfig `toml:"integrations"`	// External integration settings.
-	Logging      LoggingConfig      `toml:"logging"`		// Logging output configuration.
-	Plugins      PluginsConfig      `toml:"plugins"`		// Plugin runtime settings.
-	REST         RESTConfig         `toml:"rest"`		// REST listener configuration.
-	Server       ServerConfig       `toml:"server"`		// Server instance settings.
-	Sync         SyncConfig         `toml:"sync"`		// Sync settings.
-	Telemetry    TelemetryConfig    `toml:"telemetry"`		// Telemetry reporting settings.
-	Websocket    WebsocketConfig    `toml:"websocket"`		// WebSocket listener configuration.
-	Client       ClientConfig       `toml:"client"`		// Client-side settings.
+	Auth         AuthConfig         `toml:"auth"`         // Authentication settings.
+	Database     DatabaseConfig     `toml:"database"`     // Database connectivity settings.
+	GRPC         GRPCConfig         `toml:"grpc"`         // gRPC listener configuration.
+	Integrations IntegrationsConfig `toml:"integrations"` // External integration settings.
+	Logging      LoggingConfig      `toml:"logging"`      // Logging output configuration.
+	Plugins      PluginsConfig      `toml:"plugins"`      // Plugin runtime settings.
+	REST         RESTConfig         `toml:"rest"`         // REST listener configuration.
+	Server       ServerConfig       `toml:"server"`       // Server instance settings.
+	Sync         SyncConfig         `toml:"sync"`         // Sync settings.
+	Telemetry    TelemetryConfig    `toml:"telemetry"`    // Telemetry reporting settings.
+	Websocket    WebsocketConfig    `toml:"websocket"`    // WebSocket listener configuration.
+	Client       ClientConfig       `toml:"client"`       // Client-side settings.
 }
 
 // }}}
