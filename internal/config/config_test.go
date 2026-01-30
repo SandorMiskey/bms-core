@@ -10,6 +10,7 @@ package config
 
 import (
 	"errors"
+	"os"
 	"strings"
 	"testing"
 )
@@ -98,6 +99,49 @@ func TestValidateConfigAggregatesErrors(t *testing.T) {
 		if !seen {
 			t.Fatalf("expected validation error for %s", path)
 		}
+	}
+}
+
+func TestResolveConfigDiagnosticsReturnsWarnings(t *testing.T) {
+	file, err := os.CreateTemp("", "bms-config-*.toml")
+	if err != nil {
+		t.Fatalf("failed to create temp file: %v", err)
+	}
+	defer func() {
+		_ = os.Remove(file.Name())
+	}()
+
+	input := `
+[database]
+driver = "sqlite"
+dsn = "file:bms.db"
+
+[auth.key_storage]
+allow_unencrypted = true
+`
+	if _, err := file.WriteString(input); err != nil {
+		_ = file.Close()
+		t.Fatalf("failed to write temp config: %v", err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatalf("failed to close temp config: %v", err)
+	}
+
+	config, path, warnings, err := ResolveConfigDiagnostics(file.Name(), ConfigOverlay{}, ConfigOverlay{})
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+	if path == "" {
+		t.Fatal("expected resolved path")
+	}
+	if config.Database.DSN == "" {
+		t.Fatal("expected database.dsn to be set")
+	}
+	if len(warnings) != 1 {
+		t.Fatalf("expected 1 warning, got %d", len(warnings))
+	}
+	if warnings[0].Path != "auth.key_storage.allow_unencrypted" {
+		t.Fatalf("unexpected warning path: %s", warnings[0].Path)
 	}
 }
 

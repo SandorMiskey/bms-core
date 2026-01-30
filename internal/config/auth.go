@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
 
+// Authentication configuration.
+// This file defines auth enums and structs that describe authentication modes,
+// token handling, and nested auth settings used during config parsing and
+// validation. The types map to the [auth] section and its subsections.
+
 package config
 
 // Auth enums and constants. {{{

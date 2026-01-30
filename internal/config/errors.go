@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
 
+// Config error types.
+// This file defines errors used by the config pipeline and validation helpers.
+// It provides file/loader errors plus aggregated field validation errors for
+// reporting multiple config issues at once.
+
 package config
 
 import (

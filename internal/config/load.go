@@ -9,7 +9,10 @@
 
 package config
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 // LoadConfig reads and decodes the config file at the given path. {{{
 
@@ -19,7 +22,7 @@ func LoadConfig(path string) (Config, error) {
 		if os.IsNotExist(err) {
 			return Config{}, ErrConfigNotFound
 		}
-		return Config{}, err
+		return Config{}, fmt.Errorf("stat config %s: %w", path, err)
 	}
 	if info.IsDir() {
 		return Config{}, ErrConfigPathIsDir
@@ -27,7 +30,7 @@ func LoadConfig(path string) (Config, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return Config{}, err
+		return Config{}, fmt.Errorf("open config %s: %w", path, err)
 	}
 	defer file.Close()
 
@@ -60,7 +63,7 @@ func LoadConfigOverlay(path string) (ConfigOverlay, error) {
 		if os.IsNotExist(err) {
 			return ConfigOverlay{}, ErrConfigNotFound
 		}
-		return ConfigOverlay{}, err
+		return ConfigOverlay{}, fmt.Errorf("stat config overlay %s: %w", path, err)
 	}
 	if info.IsDir() {
 		return ConfigOverlay{}, ErrConfigPathIsDir
@@ -68,7 +71,7 @@ func LoadConfigOverlay(path string) (ConfigOverlay, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return ConfigOverlay{}, err
+		return ConfigOverlay{}, fmt.Errorf("open config overlay %s: %w", path, err)
 	}
 	defer file.Close()
 

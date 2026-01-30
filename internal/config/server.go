@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
 
+// Server and database configuration.
+// This file defines runtime environment enums plus server and database config
+// structs. The types map to [server] and [database] sections to control
+// instance identity and database connectivity.
+
 package config
 
 // Environment selects the server runtime mode. {{{

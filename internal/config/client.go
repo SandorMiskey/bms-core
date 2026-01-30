@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
 
+// Client configuration.
+// This file defines client-side configuration structs for endpoints, auth
+// persistence, UI settings, and offline behavior. The types map to [client.*]
+// sections and are used by TUI/CLI and other client frontends.
+
 package config
 
 // ClientConfig configures client-side settings. {{{

@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
 
+// Runtime feature configuration.
+// This file defines integration, plugin, sync, and telemetry config structs.
+// The types map to [integrations], [plugins], [sync], and [telemetry] sections
+// to toggle runtime features and endpoints.
+
 package config
 
 // Clublog, LoTW and QRZ.com integrations. {{{

@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
 
+// Config path discovery.
+// This file resolves the default config path and processes override paths,
+// including `~` expansion for user home directories. It centralizes path
+// resolution so loaders share consistent discovery behavior.
+
 package config
 
 import (

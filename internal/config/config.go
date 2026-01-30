@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
 
+// Config root structure.
+// This file defines the top-level Config struct used by the config pipeline.
+// It groups server and client sections and maps them to TOML sections for
+// decoding, merging, and validation.
+
 package config
 
 // Config holds server and client configuration sections. {{{

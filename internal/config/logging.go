@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
 
+// Logging configuration.
+// This file defines log format and log level enums plus LoggingConfig for the
+// [logging] section, which controls structured log output at runtime.
+
 package config
 
 // LogFormat defines the log output format. {{{
