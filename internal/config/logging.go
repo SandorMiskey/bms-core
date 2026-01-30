@@ -33,4 +33,5 @@ type LoggingConfig struct {
 }
 
 // }}}
+
 // vim: set ts=4 sw=4 noet:

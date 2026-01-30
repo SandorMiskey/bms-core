@@ -60,4 +60,5 @@ func expandUserPath(path string) (string, error) {
 }
 
 // }}}
+
 // vim: set ts=4 sw=4 noet:
