@@ -4,7 +4,7 @@
 // Config decoding helpers.
 // This file parses TOML into the runtime Config struct and enforces strict
 // decoding by rejecting any undecoded keys returned by the TOML metadata.
-// A small helper formats unknown keys so callers get a clear error message.
+// A small helper formats invalid keys so callers get a clear error message.
 
 package config
 
@@ -14,6 +14,8 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+
+	"github.com/SandorMiskey/bms-core/internal/errtext"
 )
 
 // Config decoding. {{{
@@ -38,7 +40,7 @@ func checkUndecodedKeys(meta toml.MetaData) error {
 		return nil
 	}
 
-	return fmt.Errorf("unknown config keys: %s", formatUndecodedKeys(keys))
+	return fmt.Errorf("%s: %s", errtext.ErrInvalidConfigKeys, formatUndecodedKeys(keys))
 }
 
 func formatUndecodedKeys(keys []toml.Key) string {

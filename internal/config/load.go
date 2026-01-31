@@ -12,6 +12,8 @@ package config
 import (
 	"fmt"
 	"os"
+
+	"github.com/SandorMiskey/bms-core/internal/errtext"
 )
 
 // LoadConfig reads and decodes the config file at the given path. {{{
@@ -22,7 +24,7 @@ func LoadConfig(path string) (Config, error) {
 		if os.IsNotExist(err) {
 			return Config{}, ErrConfigNotFound
 		}
-		return Config{}, fmt.Errorf("stat config %s: %w", path, err)
+		return Config{}, fmt.Errorf("%s %q: %w", errtext.ErrStatConfig, path, err)
 	}
 	if info.IsDir() {
 		return Config{}, ErrConfigPathIsDir
@@ -30,7 +32,7 @@ func LoadConfig(path string) (Config, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return Config{}, fmt.Errorf("open config %s: %w", path, err)
+		return Config{}, fmt.Errorf("%s %q: %w", errtext.ErrOpenConfig, path, err)
 	}
 	defer file.Close()
 
@@ -63,7 +65,7 @@ func LoadConfigOverlay(path string) (ConfigOverlay, error) {
 		if os.IsNotExist(err) {
 			return ConfigOverlay{}, ErrConfigNotFound
 		}
-		return ConfigOverlay{}, fmt.Errorf("stat config overlay %s: %w", path, err)
+		return ConfigOverlay{}, fmt.Errorf("%s %q: %w", errtext.ErrStatConfigOverlay, path, err)
 	}
 	if info.IsDir() {
 		return ConfigOverlay{}, ErrConfigPathIsDir
@@ -71,7 +73,7 @@ func LoadConfigOverlay(path string) (ConfigOverlay, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return ConfigOverlay{}, fmt.Errorf("open config overlay %s: %w", path, err)
+		return ConfigOverlay{}, fmt.Errorf("%s %q: %w", errtext.ErrOpenConfigOverlay, path, err)
 	}
 	defer file.Close()
 

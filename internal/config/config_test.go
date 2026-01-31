@@ -13,6 +13,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/SandorMiskey/bms-core/internal/errtext"
 )
 
 // Config tests. {{{
@@ -26,10 +28,10 @@ unknown = "value"
 
 	_, err := DecodeConfig(strings.NewReader(input))
 	if err == nil {
-		t.Fatal("expected unknown key error")
+		t.Fatal("expected invalid config keys error")
 	}
-	if !strings.Contains(err.Error(), "unknown config keys") {
-		t.Fatalf("expected unknown keys error, got: %v", err)
+	if !strings.Contains(err.Error(), errtext.ErrInvalidConfigKeys) {
+		t.Fatalf("expected invalid config keys error, got: %v", err)
 	}
 	if !strings.Contains(err.Error(), "server.unknown") {
 		t.Fatalf("expected server.unknown in error, got: %v", err)
