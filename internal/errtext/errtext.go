@@ -11,19 +11,21 @@ package errtext
 // Error text constants. {{{
 
 const (
-	ErrConfigResolutionFailed = "config resolution failed"
-	ErrConfigValidationFailed = "config validation failed"
-	ErrInvalidConfigKeys      = "invalid config keys"
-	ErrInvalidLogComponent    = "invalid log component"
-	ErrInvalidLogFormat       = "invalid log format"
-	ErrInvalidLogLevel        = "invalid log level"
-	ErrLoggerInitFailed       = "logger init failed"
-	ErrLogFormatRequired      = "log format is required"
-	ErrLogLevelRequired       = "log level is required"
-	ErrOpenConfig             = "open config"
-	ErrOpenConfigOverlay      = "open config overlay"
-	ErrStatConfig             = "stat config"
-	ErrStatConfigOverlay      = "stat config overlay"
+	ErrConfigResolutionFailed     = "config resolution failed"
+	ErrConfigValidationFailed     = "config validation failed"
+	ErrHealthServerServeFailed    = "health server failed"
+	ErrHealthServerShutdownFailed = "health server shutdown failed"
+	ErrInvalidConfigKeys          = "invalid config keys"
+	ErrInvalidLogComponent        = "invalid log component"
+	ErrInvalidLogFormat           = "invalid log format"
+	ErrInvalidLogLevel            = "invalid log level"
+	ErrLoggerInitFailed           = "logger init failed"
+	ErrLogFormatRequired          = "log format is required"
+	ErrLogLevelRequired           = "log level is required"
+	ErrOpenConfig                 = "open config"
+	ErrOpenConfigOverlay          = "open config overlay"
+	ErrStatConfig                 = "stat config"
+	ErrStatConfigOverlay          = "stat config overlay"
 )
 
 // }}}

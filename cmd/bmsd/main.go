@@ -9,13 +9,19 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"log/slog"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/SandorMiskey/bms-core/internal/config"
 	"github.com/SandorMiskey/bms-core/internal/errtext"
+	"github.com/SandorMiskey/bms-core/internal/health"
 	"github.com/SandorMiskey/bms-core/internal/logging"
 )
 
@@ -40,6 +46,12 @@ func main() {
 	}
 
 	logging.LogConfigDiagnostics(logger, format, configResult, path, warnings)
+
+	healthState := health.NewState()
+	healthServer := startHealthServer(logger, configResult.REST.Address, healthState)
+	healthState.SetReady(true)
+
+	waitForShutdown(logger, healthServer)
 }
 
 func initLogger(cfg config.Config, component logging.Component) (*slog.Logger, config.LogFormat) {
@@ -66,6 +78,46 @@ func initLogger(cfg config.Config, component logging.Component) (*slog.Logger, c
 	}
 
 	return logger, format
+}
+
+func startHealthServer(logger *slog.Logger, address string, state *health.State) *http.Server {
+	if address == "" {
+		logger.Warn("health server disabled", "reason", "rest address is empty")
+		return nil
+	}
+
+	server := &http.Server{
+		Addr:              address,
+		Handler:           health.NewMux(state),
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       30 * time.Second,
+	}
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Error(errtext.ErrHealthServerServeFailed, "error", err, "address", address)
+		}
+	}()
+
+	return server
+}
+
+func waitForShutdown(logger *slog.Logger, server *http.Server) {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	<-ctx.Done()
+	if server == nil {
+		return
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		logger.Error(errtext.ErrHealthServerShutdownFailed, "error", err)
+	}
 }
 
 // }}}
