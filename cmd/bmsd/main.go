@@ -10,6 +10,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"log/slog"
 	"os"
 
@@ -21,7 +22,10 @@ import (
 // Main entry point. {{{
 
 func main() {
-	configResult, path, warnings, err := config.ResolveConfigDiagnostics("", config.ConfigOverlay{}, config.ConfigOverlay{})
+	configPath := flag.String("config", "", "path to config.toml")
+	flag.Parse()
+
+	configResult, path, warnings, err := config.ResolveConfigDiagnostics(*configPath, config.ConfigOverlay{}, config.ConfigOverlay{})
 	logger, format := initLogger(configResult, logging.ComponentServer)
 
 	if err != nil {
