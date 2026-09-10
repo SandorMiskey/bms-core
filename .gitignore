@@ -38,6 +38,16 @@
 go.work
 
 # }}}
+# Local database artifacts {{{
+
+# Development databases created by `just migrate-up sqlite`.
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# }}}
 # Node tooling (if used) {{{
 
 node_modules/
