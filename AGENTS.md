@@ -10,7 +10,8 @@
 - Built and tested: `internal/config` (strict TOML, pointer-based overlays, defaults → file → env → CLI → server precedence, aggregated validation, redaction, warnings), `internal/logging` (slog, canonical fields, request/trace context, startup diagnostics), `internal/health` (`/healthz`, `/readyz`), `internal/db` (sqlite/libsql/postgres open, pooling, SQLite DSN pragmas), `internal/errtext` (centralized error text).
 - Entry points: `cmd/bmsd` resolves config, logs diagnostics, serves health, opens the database, marks readiness, and shuts down on signal. `cmd/bms` resolves config and logs diagnostics only; there is no TUI yet.
 - Not yet present: `db/` (migrations, schema dumps, queries, `sqlc.yaml`), `proto/`, `pkg/`, `plugins/`. `configs/`, `deploy/`, `docs/`, `gen/` hold `.gitkeep` placeholders.
-- `scripts/migrate-check.sh` and every `migrate-*` recipe expect the `db/` tree and fail with `missing directory` until it exists. That is step `1.1.4 Migration Layout`, the next database milestone.
+- `scripts/migrate-check.sh` and every `migrate-*` recipe expect the `db/` tree and fail with `missing directory` until it exists. That is step `1.1.4 Migration and Storage Implementation`, the next step in the Phase 1 execution order (`bms-meta/EXECUTION-PLAN.md`).
+- Decisions from the 2026-09-10 plan review that shape the next steps (`bms-meta/docs/reviews/2026-09-10-plan-review.md`): migrations are embedded in `bmsd` and applied through the golang-migrate library (the Homebrew `migrate` CLI has no SQLite driver); SQLite DSN pragmas `foreign_keys(1)`, `journal_mode(WAL)`, `synchronous(NORMAL)` join `busy_timeout`; timestamps are `TIMESTAMP`/`TIMESTAMPTZ` RFC 3339 UTC; `public_id` is ULID via `oklog/ulid/v2`; the TUI targets Bubble Tea v2 (`charm.land/bubbletea/v2`); MVP auth is local trust + optional password + sessions.
 - Update this section when a plan step completes or the tree changes.
 
 ## Build, Lint, Test
@@ -19,9 +20,9 @@
 - Run all tests: `just test`. One package: `just test ./internal/config`.
 - One test, verbose: `just test-one ./internal/db TestSQLiteDSN`.
 - Format in place: `just fmt` (`gofmt -w .`). List unformatted files: `just fmt-check`.
-- Lint: `just lint` (`golangci-lint run ./...`). The binary must be built with the same Go major version as the active toolchain; a mismatch panics on package load. Reinstall with `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`.
+- Lint: `just lint` (`golangci-lint run ./...`, configured by `.golangci.yml`: the v2 standard set plus gofmt). The binary must be built with the same Go major version as the active toolchain; a mismatch panics on package load. Reinstall with `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`.
 - Migrations: `just dep`, `just migrate-check`, `just migrate-up <engine>`, `just migrate-down <engine>`, `just migrate-version <engine>`, `just migrate-dump <engine>`, `just migrate-validate <engine>`, where `<engine>` is `sqlite` or `postgres`. `up` and `down` depend on `dep` and `migrate-check`, so lint always runs first.
-- Local settings: copy `.env.example` to `.env` (gitignored); the justfile loads it automatically, and shell environment wins over `.env`, which wins over the recipe defaults. Homebrew keeps `libpq` keg-only, so set `BMS_PG_DUMP=/opt/homebrew/opt/libpq/bin/pg_dump` (the version-independent `opt` symlink, not a `Cellar` path).
+- Local settings: copy `.env.example` to `.env` (gitignored; a copy, not a symlink, or edits land in the example); the justfile loads it automatically, and shell environment wins over `.env`, which wins over the recipe defaults. Homebrew keeps `libpq` keg-only, so set `BMS_PG_DUMP=/opt/homebrew/opt/libpq/bin/pg_dump` (the version-independent `opt` symlink, not a `Cellar` path).
 - Tooling expected on the machine: `go`, `just`, `migrate` (golang-migrate), `sqlite3`, `pg_dump`, `sqlc`, `golangci-lint`. Still to install when the step arrives: `buf` (proto, Phase 1.4).
 - Planned API tooling (Phase 1.5): Swagger UI for the REST gateway, `protoc-gen-doc` for gRPC, Postman collections.
 - CI is deferred; recipes are run manually.

@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
+#
+# golangci-lint v2 configuration.
+# Keeps the standard linter set (errcheck, govet, ineffassign, staticcheck,
+# unused) so `just lint` has a defined rule set; extend deliberately.
+
+version: "2"
+
+linters:
+  default: standard
+
+formatters:
+  enable:
+    - gofmt
+
+# vim: set ts=4 sw=4 noet:
