@@ -4,12 +4,14 @@
 // Server entry point.
 // This file defines the bmsd main function, which resolves configuration,
 // initializes structured logging with server defaults, emits startup
-// diagnostics (redacted), and exits on configuration errors.
+// diagnostics (redacted), opens the database connection, and manages
+// readiness and shutdown.
 
 package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"flag"
 	"log/slog"
@@ -20,6 +22,7 @@ import (
 	"time"
 
 	"github.com/SandorMiskey/bms-core/internal/config"
+	"github.com/SandorMiskey/bms-core/internal/db"
 	"github.com/SandorMiskey/bms-core/internal/errtext"
 	"github.com/SandorMiskey/bms-core/internal/health"
 	"github.com/SandorMiskey/bms-core/internal/logging"
@@ -49,9 +52,14 @@ func main() {
 
 	healthState := health.NewState()
 	healthServer := startHealthServer(logger, configResult.REST.Address, healthState)
+	databaseHandle, err := openDatabase(configResult)
+	if err != nil {
+		logger.Error(errtext.ErrDatabaseOpenFailed, "error", err)
+		os.Exit(1)
+	}
 	healthState.SetReady(true)
 
-	waitForShutdown(logger, healthServer)
+	waitForShutdown(logger, healthServer, databaseHandle)
 }
 
 func initLogger(cfg config.Config, component logging.Component) (*slog.Logger, config.LogFormat) {
@@ -104,19 +112,29 @@ func startHealthServer(logger *slog.Logger, address string, state *health.State)
 	return server
 }
 
-func waitForShutdown(logger *slog.Logger, server *http.Server) {
+func openDatabase(cfg config.Config) (*sql.DB, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	return db.Open(ctx, cfg.Database)
+}
+
+func waitForShutdown(logger *slog.Logger, server *http.Server, databaseHandle *sql.DB) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	<-ctx.Done()
-	if server == nil {
+	if server != nil {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			logger.Error(errtext.ErrHealthServerShutdownFailed, "error", err)
+		}
+	}
+	if databaseHandle == nil {
 		return
 	}
-
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		logger.Error(errtext.ErrHealthServerShutdownFailed, "error", err)
+	if err := databaseHandle.Close(); err != nil {
+		logger.Error(errtext.ErrDatabaseCloseFailed, "error", err)
 	}
 }
 

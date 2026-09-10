@@ -9,7 +9,10 @@
 
 package config
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // Config validation. {{{
 // This block defines ValidateConfig and section-specific validators that
@@ -32,12 +35,42 @@ func ValidateConfig(config Config) error {
 }
 
 func validateDatabaseConfig(database DatabaseConfig, errs *ValidationErrors) {
-	if database.Driver != DriverSQLite && database.Driver != DriverPostgres {
-		appendFieldError(errs, "database.driver", "must be sqlite or postgres")
+	if database.Driver != DriverSQLite && database.Driver != DriverLibSQL && database.Driver != DriverPostgres {
+		appendFieldError(errs, "database.driver", "must be sqlite, libsql, or postgres")
 		return
 	}
 	if database.DSN == "" {
 		appendFieldError(errs, "database.dsn", "is required when database.driver is set")
+	}
+	validateDatabaseDSN(database, errs)
+	if database.MaxOpenConns < 0 {
+		appendFieldError(errs, "database.max_open_conns", "must be zero or greater")
+	}
+	if database.MaxIdleConns < 0 {
+		appendFieldError(errs, "database.max_idle_conns", "must be zero or greater")
+	}
+	validateDurationField(database.BusyTimeout, "database.busy_timeout", errs)
+	validateDurationField(database.ConnMaxLifetime, "database.conn_max_lifetime", errs)
+	validateDurationField(database.ConnMaxIdleTime, "database.conn_max_idle_time", errs)
+}
+
+func validateDatabaseDSN(database DatabaseConfig, errs *ValidationErrors) {
+	if database.DSN == "" {
+		return
+	}
+	switch database.Driver {
+	case DriverSQLite:
+		if database.DSN != ":memory:" && !strings.HasPrefix(database.DSN, "file:") {
+			appendFieldError(errs, "database.dsn", "must be file:/path/to/db or :memory: when database.driver is sqlite")
+		}
+	case DriverLibSQL:
+		if !strings.HasPrefix(database.DSN, "libsql://") && !strings.HasPrefix(database.DSN, "https://") {
+			appendFieldError(errs, "database.dsn", "must start with libsql:// or https:// when database.driver is libsql")
+		}
+	case DriverPostgres:
+		if !strings.HasPrefix(database.DSN, "postgres://") {
+			appendFieldError(errs, "database.dsn", "must start with postgres:// when database.driver is postgres")
+		}
 	}
 }
 
@@ -80,6 +113,15 @@ func validateAuthDurations(auth AuthConfig, errs *ValidationErrors) {
 
 func appendFieldError(errs *ValidationErrors, path string, message string) {
 	*errs = append(*errs, FieldError{Path: path, Message: message})
+}
+
+func validateDurationField(value string, path string, errs *ValidationErrors) {
+	if value == "" {
+		return
+	}
+	if _, err := time.ParseDuration(value); err != nil {
+		appendFieldError(errs, path, "must be a valid duration")
+	}
 }
 
 // }}}

@@ -13,11 +13,12 @@ import "os"
 // Env overrides. {{{
 
 const (
-	envAuthMode       = "BMS_AUTH_MODE"
-	envDatabaseDSN    = "BMS_DATABASE_DSN"
-	envDatabaseDriver = "BMS_DATABASE_DRIVER"
-	envServerID       = "BMS_SERVER_ID"
-	envSyncMode       = "BMS_SYNC_MODE"
+	envAuthMode          = "BMS_AUTH_MODE"
+	envDatabaseAuthToken = "BMS_DATABASE_AUTH_TOKEN"
+	envDatabaseDSN       = "BMS_DATABASE_DSN"
+	envDatabaseDriver    = "BMS_DATABASE_DRIVER"
+	envServerID          = "BMS_SERVER_ID"
+	envSyncMode          = "BMS_SYNC_MODE"
 )
 
 // ApplyEnvOverrides merges environment overrides into the base config.
@@ -31,6 +32,10 @@ func ApplyEnvOverrides(base Config) (Config, error) {
 	if value := os.Getenv(envDatabaseDriver); value != "" {
 		overlay.Database = ensureDatabaseOverlay(overlay.Database)
 		overlay.Database.Driver = databaseDriverPointer(value)
+	}
+	if value := os.Getenv(envDatabaseAuthToken); value != "" {
+		overlay.Database = ensureDatabaseOverlay(overlay.Database)
+		overlay.Database.AuthToken = stringPointer(value)
 	}
 	if value := os.Getenv(envServerID); value != "" {
 		overlay.Server = ensureServerOverlay(overlay.Server)

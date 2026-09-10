@@ -13,6 +13,12 @@ package errtext
 const (
 	ErrConfigResolutionFailed     = "config resolution failed"
 	ErrConfigValidationFailed     = "config validation failed"
+	ErrDatabaseBusyTimeoutInvalid = "database busy timeout invalid"
+	ErrDatabaseCloseFailed        = "database close failed"
+	ErrDatabaseDriverUnavailable  = "database driver unavailable"
+	ErrDatabaseDriverUnsupported  = "database driver unsupported"
+	ErrDatabaseOpenFailed         = "database open failed"
+	ErrDatabasePingFailed         = "database ping failed"
 	ErrHealthServerServeFailed    = "health server failed"
 	ErrHealthServerShutdownFailed = "health server shutdown failed"
 	ErrInvalidConfigKeys          = "invalid config keys"

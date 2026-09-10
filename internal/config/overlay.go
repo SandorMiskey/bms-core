@@ -11,6 +11,7 @@
 // }}}
 
 package config
+
 // Config overlay root. {{{
 
 type ConfigOverlay struct {
@@ -37,9 +38,15 @@ type ServerConfigOverlay struct {
 }
 
 type DatabaseConfigOverlay struct {
-	DSN        *string         `toml:"dsn"`        // Connection string override.
-	Driver     *DatabaseDriver `toml:"driver"`     // Database engine override.
-	Migrations *string         `toml:"migrations"` // Migrations directory override.
+	DSN             *string         `toml:"dsn"`                // Connection string override.
+	Driver          *DatabaseDriver `toml:"driver"`             // Database engine override.
+	Migrations      *string         `toml:"migrations"`         // Migrations directory override.
+	AuthToken       *string         `toml:"auth_token"`         // Authentication token override.
+	BusyTimeout     *string         `toml:"busy_timeout"`       // Busy timeout override.
+	MaxOpenConns    *int            `toml:"max_open_conns"`     // Max open connections override.
+	MaxIdleConns    *int            `toml:"max_idle_conns"`     // Max idle connections override.
+	ConnMaxLifetime *string         `toml:"conn_max_lifetime"`  // Max connection lifetime override.
+	ConnMaxIdleTime *string         `toml:"conn_max_idle_time"` // Max idle connection time override.
 }
 
 type LoggingConfigOverlay struct {

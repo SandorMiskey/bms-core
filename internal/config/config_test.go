@@ -105,6 +105,55 @@ func TestValidateConfigAggregatesErrors(t *testing.T) {
 	}
 }
 
+func TestValidateDatabaseDSNRules(t *testing.T) {
+	tests := []struct {
+		name    string
+		driver  DatabaseDriver
+		dsn     string
+		wantErr bool
+	}{
+		{name: "sqlite file", driver: DriverSQLite, dsn: "file:bms.db"},
+		{name: "sqlite memory", driver: DriverSQLite, dsn: ":memory:"},
+		{name: "sqlite invalid", driver: DriverSQLite, dsn: "sqlite3://bms.db", wantErr: true},
+		{name: "libsql", driver: DriverLibSQL, dsn: "libsql://example.turso.io"},
+		{name: "libsql https", driver: DriverLibSQL, dsn: "https://example.turso.io"},
+		{name: "libsql invalid", driver: DriverLibSQL, dsn: "file:bms.db", wantErr: true},
+		{name: "postgres", driver: DriverPostgres, dsn: "postgres://user:pass@localhost:5432/bms"},
+		{name: "postgres invalid", driver: DriverPostgres, dsn: "postgresql://localhost/bms", wantErr: true},
+	}
+
+	for _, test := range tests {
+		config := DefaultConfig()
+		config.Database.Driver = test.driver
+		config.Database.DSN = test.dsn
+
+		err := ValidateConfig(config)
+		if test.wantErr {
+			if err == nil {
+				t.Fatalf("%s: expected validation error", test.name)
+			}
+			var errs ValidationErrors
+			if !errors.As(err, &errs) {
+				t.Fatalf("%s: expected ValidationErrors, got: %T", test.name, err)
+			}
+			found := false
+			for _, fieldErr := range errs {
+				if fieldErr.Path == "database.dsn" {
+					found = true
+				}
+			}
+			if !found {
+				t.Fatalf("%s: expected database.dsn validation error", test.name)
+			}
+			continue
+		}
+
+		if err != nil {
+			t.Fatalf("%s: expected no error, got: %v", test.name, err)
+		}
+	}
+}
+
 func TestResolveConfigDiagnosticsReturnsWarnings(t *testing.T) {
 	file, err := os.CreateTemp("", "bms-config-*.toml")
 	if err != nil {
@@ -156,13 +205,16 @@ func TestRedactConfig(t *testing.T) {
 		Client: ClientConfig{
 			Auth: ClientAuthConfig{Token: "token"},
 		},
-		Database: DatabaseConfig{DSN: "file:secret.db"},
+		Database: DatabaseConfig{DSN: "file:secret.db", AuthToken: "auth-token"},
 		Logging:  LoggingConfig{Level: LogLevelInfo},
 	}
 
 	redacted := RedactConfig(config)
 	if redacted.Database.DSN != "[redacted]" {
 		t.Fatalf("expected database.dsn to be redacted, got: %s", redacted.Database.DSN)
+	}
+	if redacted.Database.AuthToken != "[redacted]" {
+		t.Fatalf("expected database.auth_token to be redacted, got: %s", redacted.Database.AuthToken)
 	}
 	if redacted.Auth.Remote.Endpoint != "[redacted]" {
 		t.Fatalf("expected auth.remote.endpoint to be redacted, got: %s", redacted.Auth.Remote.Endpoint)

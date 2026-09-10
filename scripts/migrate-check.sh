@@ -20,11 +20,11 @@ set -eu
 # Resolve repository root for relative paths.
 ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
-MIGRATIONS_SHARED=${MIGRATIONS_SHARED:-"$ROOT_DIR/db/migrations/shared"}
-MIGRATIONS_SQLITE=${MIGRATIONS_SQLITE:-"$ROOT_DIR/db/migrations/sqlite"}
-MIGRATIONS_POSTGRES=${MIGRATIONS_POSTGRES:-"$ROOT_DIR/db/migrations/postgres"}
-SCHEMA_SQLITE=${SCHEMA_SQLITE:-"$ROOT_DIR/db/schema/sqlite"}
-SCHEMA_POSTGRES=${SCHEMA_POSTGRES:-"$ROOT_DIR/db/schema/postgres"}
+MIGRATIONS_SHARED=${BMS_MIGRATIONS_SHARED:-"$ROOT_DIR/db/migrations/shared"}
+MIGRATIONS_SQLITE=${BMS_MIGRATIONS_SQLITE:-"$ROOT_DIR/db/migrations/sqlite"}
+MIGRATIONS_POSTGRES=${BMS_MIGRATIONS_POSTGRES:-"$ROOT_DIR/db/migrations/postgres"}
+SCHEMA_SQLITE=${BMS_SCHEMA_SQLITE:-"$ROOT_DIR/db/schema/sqlite"}
+SCHEMA_POSTGRES=${BMS_SCHEMA_POSTGRES:-"$ROOT_DIR/db/schema/postgres"}
 
 fail() {
   echo "migrate-check: $*" >&2
@@ -64,10 +64,10 @@ check_pairs "$MIGRATIONS_POSTGRES"
 
 # Ensure shared migrations exist in both sqlite and postgres.
 for shared in "$MIGRATIONS_SHARED"/*.up.sql "$MIGRATIONS_SHARED"/*.down.sql; do
-  [ -e "$shared" ] || continue
-  file=$(basename "$shared")
-  [ -f "$MIGRATIONS_SQLITE/$file" ] || fail "missing sqlite migration: $file"
-  [ -f "$MIGRATIONS_POSTGRES/$file" ] || fail "missing postgres migration: $file"
+	[ -e "$shared" ] || continue
+	file=$(basename "$shared")
+	[ -f "$MIGRATIONS_SQLITE/$file" ] || fail "missing sqlite migration: $file"
+	[ -f "$MIGRATIONS_POSTGRES/$file" ] || fail "missing postgres migration: $file"
 done
 
 # Enforce IRREVERSIBLE header for destructive statements and parity with shared.
@@ -106,7 +106,7 @@ done
 # Ensure schema dumps exist for the latest migration.
 if [ -n "$latest" ]; then
   if ! ls "$SCHEMA_SQLITE"/schema_*_after_${latest}*.sql >/dev/null 2>&1; then
-    fail "missing sqlite schema dump for migration $latest"
+	fail "missing sqlite schema dump for migration $latest"
   fi
   if ! ls "$SCHEMA_POSTGRES"/schema_*_after_${latest}*.sql >/dev/null 2>&1; then
     fail "missing postgres schema dump for migration $latest"

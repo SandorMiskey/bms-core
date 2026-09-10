@@ -17,6 +17,7 @@ const redactedValue = "[redacted]"
 func RedactConfig(config Config) Config {
 	redacted := config
 	redacted.Database.DSN = redactValue(redacted.Database.DSN)
+	redacted.Database.AuthToken = redactValue(redacted.Database.AuthToken)
 	redacted.Auth.Remote.Endpoint = redactValue(redacted.Auth.Remote.Endpoint)
 	redacted.Client.Auth.Token = redactValue(redacted.Client.Auth.Token)
 

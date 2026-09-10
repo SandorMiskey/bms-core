@@ -86,6 +86,24 @@ func mergeDatabaseConfig(base DatabaseConfig, overlay DatabaseConfigOverlay) Dat
 	if overlay.Migrations != nil {
 		base.Migrations = *overlay.Migrations
 	}
+	if overlay.AuthToken != nil {
+		base.AuthToken = *overlay.AuthToken
+	}
+	if overlay.BusyTimeout != nil {
+		base.BusyTimeout = *overlay.BusyTimeout
+	}
+	if overlay.MaxOpenConns != nil {
+		base.MaxOpenConns = *overlay.MaxOpenConns
+	}
+	if overlay.MaxIdleConns != nil {
+		base.MaxIdleConns = *overlay.MaxIdleConns
+	}
+	if overlay.ConnMaxLifetime != nil {
+		base.ConnMaxLifetime = *overlay.ConnMaxLifetime
+	}
+	if overlay.ConnMaxIdleTime != nil {
+		base.ConnMaxIdleTime = *overlay.ConnMaxIdleTime
+	}
 
 	return base
 }

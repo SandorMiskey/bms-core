@@ -13,6 +13,7 @@ package config
 
 const (
 	defaultAuthTokenTTL           = "168h"
+	defaultDatabaseBusyTimeout    = "5s"
 	defaultRefreshBeforeExpiry    = 0.8
 	defaultServerAuthTokenStorage = AuthTokenStorageKeychain
 )
@@ -29,6 +30,9 @@ func DefaultConfig() Config {
 			Auth: ClientAuthConfig{
 				RefreshBeforeExpiry: defaultRefreshBeforeExpiry,
 			},
+		},
+		Database: DatabaseConfig{
+			BusyTimeout: defaultDatabaseBusyTimeout,
 		},
 	}
 }
