@@ -34,7 +34,7 @@
 - Keep public APIs documented with Go doc comments.
 - Keep generated code in `gen/` or `pkg/generated/`.
 - Indent with tabs (`ts=4`, `sw=4`, `noet`) in every language.
-- Go files are `gofmt` canonical: `just fmt` rewrites them and `just fmt-check` must report nothing. `gofmt` aligns trailing comments with spaces, so the tab-alignment rule below applies to non-Go files only. (`internal/config/warnings.go` predates this clarification and still uses tab-aligned comments; it is the one file `fmt-check` reports.)
+- Go files are `gofmt` canonical: `just fmt` rewrites them and `just fmt-check` must report nothing. `gofmt` aligns trailing comments with spaces, so the tab-alignment rule below applies to non-Go files only.
 - In non-Go files (justfile, shell, SQL, TOML, `.env`), align inline comments with tabs.
 - Add a Vim modeline to every source file using the appropriate comment syntax (Go: `// vim: set ts=4 sw=4 noet:`; shell, justfile, SQL, TOML: `# vim: set ts=4 sw=4 noet:` or `-- vim: ...`).
 - Add a file-level comment to every source file that explains what it contains, what it does, and how it works.

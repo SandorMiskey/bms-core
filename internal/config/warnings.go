@@ -13,8 +13,8 @@ import "strings"
 // Config warnings. {{{
 
 type FieldWarning struct {
-	Message string `toml:"-"`	// Warning message.
-	Path    string `toml:"-"`	// Config field path.
+	Message string `toml:"-"` // Warning message.
+	Path    string `toml:"-"` // Config field path.
 }
 
 func (warn FieldWarning) String() string {
