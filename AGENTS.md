@@ -1,18 +1,55 @@
 # AGENTS Guidelines (bms-core)
 
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+## License Notice
+Copyright (c) 2026 Sandor Miskey (HA5BMS, sandor@HA5BMS.RADIO)
+
+This document is licensed under Apache-2.0.
+
 ## Scope
 - Applies to the `bms-core` repository: the Go server (`bmsd`), the TUI/CLI (`bms`), and everything under `internal/`.
 - Workspace-level conventions (planning documents, documentation standards, multi-repo workflow, licensing boundaries) live in `bms-meta/AGENTS.md`, one directory up when this repo is checked out inside the workspace. This file is self-contained so a standalone clone still carries the rules it needs; the two files link to each other instead of duplicating content.
 - This file is the single source of truth for agent guidance in this repo. `CLAUDE.md` only imports it.
 
-## Repository Status (2026-09-10)
-- Implementation mode. Phase 1 (MVP server + TUI/CLI) of `bms-meta/EXECUTION-PLAN.md` is in progress; steps 1.2.1 through 1.2.4 are complete.
+## Repository Status (2026-09-12)
+- Planning resumption review completed locally. Phase 1 (MVP server + TUI/CLI)
+  is in progress; steps 1.2.1 through 1.2.4 are complete. The next product step
+  remains 1.1.4, beginning with specification review in
+  `bms-meta/docs/plans/storage-foundation.md`. Read `bms-meta/CURRENT-WORK.md`
+  for the current lane and handoff, not an old session transcript.
+- Audit baseline: build, vet and existing tests pass. `just lint` reports six
+  unchecked-close findings in `internal/config/load.go` and
+  `internal/db/db_test.go`; the first implementation package includes their
+  bounded repair. `just fmt-check` is empty.
 - Built and tested: `internal/config` (strict TOML, pointer-based overlays, defaults → file → env → CLI → server precedence, aggregated validation, redaction, warnings), `internal/logging` (slog, canonical fields, request/trace context, startup diagnostics), `internal/health` (`/healthz`, `/readyz`), `internal/db` (sqlite/libsql/postgres open, pooling, SQLite DSN pragmas), `internal/errtext` (centralized error text).
 - Entry points: `cmd/bmsd` resolves config, logs diagnostics, serves health, opens the database, marks readiness, and shuts down on signal. `cmd/bms` resolves config and logs diagnostics only; there is no TUI yet.
 - Not yet present: `db/` (migrations, schema dumps, queries, `sqlc.yaml`), `proto/`, `pkg/`, `plugins/`. `configs/`, `deploy/`, `docs/`, `gen/` hold `.gitkeep` placeholders.
 - `scripts/migrate-check.sh` and every `migrate-*` recipe expect the `db/` tree and fail with `missing directory` until it exists. That is step `1.1.4 Migration and Storage Implementation`, the next step in the Phase 1 execution order (`bms-meta/EXECUTION-PLAN.md`).
 - Decisions from the 2026-09-10 plan review that shape the next steps (`bms-meta/docs/reviews/2026-09-10-plan-review.md`): migrations are embedded in `bmsd` and applied through the golang-migrate library (the Homebrew `migrate` CLI has no SQLite driver); SQLite DSN pragmas `foreign_keys(1)`, `journal_mode(WAL)`, `synchronous(NORMAL)` join `busy_timeout`; timestamps are `TIMESTAMP`/`TIMESTAMPTZ` RFC 3339 UTC; `public_id` is ULID via `oklog/ulid/v2`; the TUI targets Bubble Tea v2 (`charm.land/bubbletea/v2`); MVP auth is local trust + optional password + sessions.
+- Implementation boundary verified 2026-09-12: only `busy_timeout` is injected
+  into SQLite DSNs. Foreign keys/WAL/NORMAL, embedded migrations, schema-aware
+  readiness, auth handlers and the new key-auth warnings are still planned.
+  The current config accepts remote libSQL URLs, not a local-file libSQL route.
 - Update this section when a plan step completes or the tree changes.
+
+## Branches, Worktrees, and Handoff
+- Every change, including documentation, uses a dedicated branch and linked
+  Git worktree; never edit the long-lived `main` checkout. Use
+  `codex/<subject>` or `claude/<subject>`; match suffixes in paired repositories.
+- Keep worktrees inside `/Volumes/HAMstack/.worktrees/<lane>/<subject>/` in the
+  workspace. A standalone clone may use a sibling task directory.
+- One session owns a checkout. Inspect branch, status, worktrees and remote
+  ancestry before starting; preserve another session's uncommitted changes.
+- Either Claude or Codex may plan, implement or review. Record scope, baseline,
+  decisions, checks and next action; use a distinct worktree for implementation.
+- Stage explicit paths, review the staged diff and commit only owned changes.
+  Do not use workspace `commit-all` in parallel lanes. Push only when asked.
+- Shared status and contract edits are serialized; isolated paths alone do not
+  make logically dependent work independent. Use disposable validation targets
+  and do not stop another session's runtime.
+- Workspace detail: `bms-meta/docs/workflow.md`; live handoff:
+  `bms-meta/CURRENT-WORK.md`. These sibling references work in paired worktrees.
 
 ## Build, Lint, Test
 - Task runner: `just` (the Makefile was removed on 2026-09-10). A bare `just` lists the recipes.
