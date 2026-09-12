@@ -1,5 +1,9 @@
 # AGENTS Guidelines (bms-core)
 
+> Lifecycle: canonical living document.
+> Last updated: 2026-09-13 (lifecycle/review metadata).
+> Evidence: Verified now for repository topology; current owner instructions govern workflow. Previous product choices await reapproval.
+
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
 ## License Notice
@@ -10,28 +14,25 @@ This document is licensed under Apache-2.0.
 ## Scope
 - Applies to the `bms-core` repository: the Go server (`bmsd`), the TUI/CLI (`bms`), and everything under `internal/`.
 - Workspace-level conventions (planning documents, documentation standards, multi-repo workflow, licensing boundaries) live in `bms-meta/AGENTS.md`, one directory up when this repo is checked out inside the workspace. This file is self-contained so a standalone clone still carries the rules it needs; the two files link to each other instead of duplicating content.
-- This file is the single source of truth for agent guidance in this repo. `CLAUDE.md` only imports it.
+- This file is tool-neutral repository guidance. `CLAUDE.md` imports it and
+  adds only tool mechanics, never a policy exception. AGENTS ownership/thinning
+  is under review in R0/P; no file consolidation has been assumed approved.
 
-## Repository Status (2026-09-12)
-- Planning resumption review completed locally. Phase 1 (MVP server + TUI/CLI)
-  is in progress; steps 1.2.1 through 1.2.4 are complete. The next product step
-  remains 1.1.4, beginning with specification review in
-  `bms-meta/docs/plans/storage-foundation.md`. Read `bms-meta/CURRENT-WORK.md`
-  for the current lane and handoff, not an old session transcript.
-- Audit baseline: build, vet and existing tests pass. `just lint` reports six
-  unchecked-close findings in `internal/config/load.go` and
-  `internal/db/db_test.go`; the first implementation package includes their
-  bounded repair. `just fmt-check` is empty.
-- Built and tested: `internal/config` (strict TOML, pointer-based overlays, defaults → file → env → CLI → server precedence, aggregated validation, redaction, warnings), `internal/logging` (slog, canonical fields, request/trace context, startup diagnostics), `internal/health` (`/healthz`, `/readyz`), `internal/db` (sqlite/libsql/postgres open, pooling, SQLite DSN pragmas), `internal/errtext` (centralized error text).
-- Entry points: `cmd/bmsd` resolves config, logs diagnostics, serves health, opens the database, marks readiness, and shuts down on signal. `cmd/bms` resolves config and logs diagnostics only; there is no TUI yet.
-- Not yet present: `db/` (migrations, schema dumps, queries, `sqlc.yaml`), `proto/`, `pkg/`, `plugins/`. `configs/`, `deploy/`, `docs/`, `gen/` hold `.gitkeep` placeholders.
-- `scripts/migrate-check.sh` and every `migrate-*` recipe expect the `db/` tree and fail with `missing directory` until it exists. That is step `1.1.4 Migration and Storage Implementation`, the next step in the Phase 1 execution order (`bms-meta/EXECUTION-PLAN.md`).
-- Decisions from the 2026-09-10 plan review that shape the next steps (`bms-meta/docs/reviews/2026-09-10-plan-review.md`): migrations are embedded in `bmsd` and applied through the golang-migrate library (the Homebrew `migrate` CLI has no SQLite driver); SQLite DSN pragmas `foreign_keys(1)`, `journal_mode(WAL)`, `synchronous(NORMAL)` join `busy_timeout`; timestamps are `TIMESTAMP`/`TIMESTAMPTZ` RFC 3339 UTC; `public_id` is ULID via `oklog/ulid/v2`; the TUI targets Bubble Tea v2 (`charm.land/bubbletea/v2`); MVP auth is local trust + optional password + sessions.
-- Implementation boundary verified 2026-09-12: only `busy_timeout` is injected
-  into SQLite DSNs. Foreign keys/WAL/NORMAL, embedded migrations, schema-aware
-  readiness, auth handlers and the new key-auth warnings are still planned.
-  The current config accepts remote libSQL URLs, not a local-file libSQL route.
-- Update this section when a plan step completes or the tree changes.
+## Repository Status (2026-09-13)
+- Verified now: the existing tree still contains config, logging, health and DB
+  connection foundations; there is no migration/schema/storage, auth or TUI
+  implementation. See Repo Structure below and the dated meta restart review
+  for the prior baseline checks and six known lint findings.
+- Current owner instruction: product implementation is paused for organization
+  and full reapproval of previous decisions. Do not start 1.1.4 from an old handoff.
+- Read `../bms-meta/CURRENT-WORK.md` and the revalidation programme in
+  `../bms-meta/EXECUTION-PLAN.md` from a paired worktree. The shared policy is
+  `../bms-meta/AGENTS.md`; sibling guidance is not automatic inheritance.
+- A standalone clone retains its local code guidance. R0/P is deciding how to
+  keep a thin entry point and bootstrap the shared policy; do not remove this
+  file or create an external symlink before that decision.
+- Existing technical rules below remain constraints while new product work is
+  paused; their design choices are inputs to the relevant R*/P review units.
 
 ## Branches, Worktrees, and Handoff
 - Every change, including documentation, uses a dedicated branch and linked
@@ -42,9 +43,11 @@ This document is licensed under Apache-2.0.
 - One session owns a checkout. Inspect branch, status, worktrees and remote
   ancestry before starting; preserve another session's uncommitted changes.
 - Either Claude or Codex may plan, implement or review. Record scope, baseline,
-  decisions, checks and next action; use a distinct worktree for implementation.
+  decisions, checks and next action. /P and /I use distinct branches/worktrees;
+  the /P plan must pass the shared Implementer Acceptance Test before closure.
 - Stage explicit paths, review the staged diff and commit only owned changes.
-  Do not use workspace `commit-all` in parallel lanes. Push only when asked.
+  Do not use workspace `commit-all` in parallel lanes. Merge, push and deletion
+  each require explicit owner instruction; completion does not authorize them.
 - Shared status and contract edits are serialized; isolated paths alone do not
   make logically dependent work independent. Use disposable validation targets
   and do not stop another session's runtime.
@@ -103,6 +106,8 @@ This document is licensed under Apache-2.0.
 - WebSocket events should be versioned and documented.
 
 ## Code Style: SQL/Migrations
+- Before migration SQL, obtain approval for the DB decision gate and the exact
+  migration scope. R6/P revalidates the baseline; historical design is not approval.
 - One migration per change; keep reversible where possible.
 - Deterministic ordering: `YYYYMMDDHHMMSS_<slug>.up.sql` / `.down.sql` (see `docs/data-layer.md` in `bms-meta`).
 - Three parallel sets: `db/migrations/shared` is the source; `sqlite/` and `postgres/` must contain the same file names. `scripts/migrate-check.sh` enforces pairs, parity, the `-- IRREVERSIBLE:` header on `DROP`/`TRUNCATE`, `public_id`-scoped seed rollbacks, and a schema dump for the latest migration.
@@ -155,7 +160,8 @@ This document is licensed under Apache-2.0.
 - Keep commits scoped and descriptive: `<area>: <imperative summary>` (`database: complete connection pooling`, `config: add --config override flag`).
 - The same message is used for the paired `bms-meta` commit when docs change alongside code.
 - Note license classification in the message when adding a new component.
-- Never push unless asked.
+- Merge, push and deletion require explicit owner instruction. Never infer them
+  from local commit, passing checks, or planning approval.
 
 ## Security and Privacy
 - Enforce TLS for remote connections when enabled.
