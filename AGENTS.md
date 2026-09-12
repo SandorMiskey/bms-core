@@ -1,7 +1,7 @@
 # AGENTS Guidelines (bms-core)
 
 > Lifecycle: canonical living document.
-> Last updated: 2026-09-13 (lifecycle/review metadata).
+> Last updated: 2026-09-13 (ORG-02 branch-model approval).
 > Evidence: Verified now for repository topology; current owner instructions govern workflow. Previous product choices await reapproval.
 
 <!-- SPDX-License-Identifier: Apache-2.0 -->
@@ -31,13 +31,20 @@ This document is licensed under Apache-2.0.
 - A standalone clone retains its local code guidance. R0/P is deciding how to
   keep a thin entry point and bootstrap the shared policy; do not remove this
   file or create an external symlink before that decision.
+- ORG-02 approved (2026-09-13): `dev` is development integration, `main` is
+  staging/pre-release, and production versions are published releases. R0/I
+  still needs to establish the new Git layout; AGENTS ownership remains open.
 - Existing technical rules below remain constraints while new product work is
   paused; their design choices are inputs to the relevant R*/P review units.
 
 ## Branches, Worktrees, and Handoff
 - Every change, including documentation, uses a dedicated branch and linked
-  Git worktree; never edit the long-lived `main` checkout. Use
+  Git worktree; never edit directly in `dev` or `main`. Use
   `codex/<subject>` or `claude/<subject>`; match suffixes in paired repositories.
+- After the R0/I transition, branch from `dev` and integrate task work into `dev`.
+  Promote reviewed development to `main` for staging/pre-release; production
+  releases identify the validated revision. The current R0/P branch retains its
+  recorded pre-transition base. Shared workflow details live in meta.
 - Keep worktrees inside `/Volumes/HAMstack/.worktrees/<lane>/<subject>/` in the
   workspace. A standalone clone may use a sibling task directory.
 - One session owns a checkout. Inspect branch, status, worktrees and remote
