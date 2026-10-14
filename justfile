@@ -40,7 +40,7 @@ BMS_SCHEMA_POSTGRES := env('BMS_SCHEMA_POSTGRES', 'db/schema/postgres')
 
 BMS_SQLITE_PATH := env('BMS_SQLITE_PATH', 'bms.db')
 BMS_SQLITE_DSN := env('BMS_SQLITE_DSN', 'sqlite3://' + BMS_SQLITE_PATH)
-BMS_DSN_POSTGRES := env('BMS_DSN_POSTGRES', 'postgres://localhost:5432/bms?sslmode=disable')
+BMS_POSTGRES_DSN := env('BMS_POSTGRES_DSN', 'postgres://localhost:5432/bms?sslmode=disable')
 
 # }}}
 # Go recipes {{{
@@ -122,10 +122,16 @@ migrate-dump engine: dep
 	#!/bin/sh
 	set -eu
 	case "{{ engine }}" in
-		sqlite)   target="$BMS_SCHEMA_SQLITE" ;;
-		postgres) target="$BMS_SCHEMA_POSTGRES" ;;
+		sqlite)   target="$BMS_SCHEMA_SQLITE";   source="$BMS_MIGRATIONS_SQLITE" ;;
+		postgres) target="$BMS_SCHEMA_POSTGRES"; source="$BMS_MIGRATIONS_POSTGRES" ;;
 		*) echo "unknown engine: {{ engine }} (expected sqlite or postgres)" >&2; exit 2 ;;
 	esac
+	# Until the first migration exists there is no schema to record, so the
+	# recipe reports that and succeeds instead of dumping an empty database.
+	if ! ls "$source"/*.up.sql >/dev/null 2>&1; then
+		echo "no {{ engine }} migrations in $source yet; no schema dump written"
+		exit 0
+	fi
 	# A dump taken before any migration is still useful, so an unknown version
 	# is recorded as `none` rather than treated as an error.
 	version=$(just _migrate {{ engine }} version 2>/dev/null | cut -d ' ' -f 1 || true)
@@ -134,7 +140,7 @@ migrate-dump engine: dep
 	file="$target/schema_$(date +%Y%m%d%H%M%S)_after_${version}.sql"
 	case "{{ engine }}" in
 		sqlite)   "$BMS_SQLITE3" "$BMS_SQLITE_PATH" '.schema' > "$file" ;;
-		postgres) "$BMS_PG_DUMP" --schema-only --no-owner --no-privileges "$BMS_DSN_POSTGRES" > "$file" ;;
+		postgres) "$BMS_PG_DUMP" --schema-only --no-owner --no-privileges "$BMS_POSTGRES_DSN" > "$file" ;;
 	esac
 	echo "wrote $file"
 
@@ -153,7 +159,7 @@ _migrate engine *args:
 			path="$BMS_MIGRATIONS_SQLITE"
 			;;
 		postgres)
-			database="$BMS_DSN_POSTGRES"
+			database="$BMS_POSTGRES_DSN"
 			path="$BMS_MIGRATIONS_POSTGRES"
 			;;
 		*)
@@ -161,6 +167,12 @@ _migrate engine *args:
 			exit 2
 			;;
 	esac
+	# Until the first migration exists there is nothing to apply, roll back or
+	# report, so the recipe says so and succeeds without opening a database.
+	if ! ls "$path"/*.up.sql >/dev/null 2>&1; then
+		echo "no {{ engine }} migrations in $path yet; nothing to do"
+		exit 0
+	fi
 	exec "$BMS_MIGRATE" -database "$database" -path "$path" {{ args }}
 
 # }}}
